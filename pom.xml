@@ -65,7 +65,7 @@
         <slf4j.version>2.0.16</slf4j.version>
         <jakarta.servlet-api.version>6.1.0</jakarta.servlet-api.version>
         <google-spring-cloud-gcp.version>5.8.0</google-spring-cloud-gcp.version>
-        <spring-cloud-starter.version>4.1.4</spring-cloud-starter.version>
+        <spring-cloud-starter.version>4.2.0</spring-cloud-starter.version>
         <springdoc-openapi-ui.version>2.6.0</springdoc-openapi-ui.version>
         <google-oauth-client.version>1.36.0</google-oauth-client.version>
         <okhttp3.version>4.12.0</okhttp3.version>
