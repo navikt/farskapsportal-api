@@ -70,7 +70,7 @@
         <google-oauth-client.version>1.36.0</google-oauth-client.version>
         <okhttp3.version>4.12.0</okhttp3.version>
         <wiremock-jre8-standalone.version>2.35.2</wiremock-jre8-standalone.version>
-        <spring-cloud-contract-wiremock.version>4.1.4</spring-cloud-contract-wiremock.version>
+        <spring-cloud-contract-wiremock.version>4.2.0</spring-cloud-contract-wiremock.version>
         <hibernate-validator.parent>8.0.0.Final</hibernate-validator.parent>
         <shedlock.version>6.0.1</shedlock.version>
         <swagger.core.version>2.2.25</swagger.core.version>
