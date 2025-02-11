@@ -17,6 +17,7 @@ import org.springframework.context.annotation.PropertySource;
 public class FarskapsportalFellesEgenskaper {
 
   private String appnavn;
+  private String naisClusternavn;
   private int maksAntallMaanederEtterFoedsel;
   private int kontrollFarMaksAntallForsoek;
   private String url;

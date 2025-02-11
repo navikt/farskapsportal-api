@@ -23,6 +23,5 @@ public class Brukernotifikasjon {
   private int synlighetBeskjedAntallMaaneder;
   private int levetidOppgaveAntallDager;
   private int sikkerhetsnivaaBeskjed;
-  private int sikkerhetsnivaaOppgave;
   private boolean skruddPaa;
 }

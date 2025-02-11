@@ -14,16 +14,14 @@ import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
 import no.nav.farskapsportal.backend.libs.felles.config.egenskaper.FarskapsportalFellesEgenskaper;
-import no.nav.farskapsportal.backend.libs.felles.consumer.brukernotifikasjon.Beskjedprodusent;
-import no.nav.farskapsportal.backend.libs.felles.consumer.brukernotifikasjon.BrukernotifikasjonConsumer;
-import no.nav.farskapsportal.backend.libs.felles.consumer.brukernotifikasjon.Ferdigprodusent;
-import no.nav.farskapsportal.backend.libs.felles.consumer.brukernotifikasjon.Oppgaveprodusent;
+import no.nav.farskapsportal.backend.libs.felles.consumer.brukernotifikasjon.*;
 import no.nav.farskapsportal.backend.libs.felles.persistence.dao.OppgavebestillingDao;
 import no.nav.farskapsportal.backend.libs.felles.service.PersistenceService;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,8 +67,8 @@ public class BrukernotifikasjonConfig {
     Map<String, Object> configProps = new HashMap<>();
     configProps.put(ProducerConfig.BATCH_SIZE_CONFIG, 1);
     configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-    configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
-    configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+    configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+    configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
     configProps.put(
         ProducerConfig.CLIENT_ID_CONFIG,
         NAMESPACE_FARSKAPSPORTAL + getHostname(new InetSocketAddress(0)));
@@ -91,7 +89,6 @@ public class BrukernotifikasjonConfig {
     configProps.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "JKS");
     configProps.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
     configProps.put("reconnect.backoff.ms", 100);
-    configProps.put("specific.avro.reader", "true");
     return configProps;
   }
 
@@ -110,15 +107,20 @@ public class BrukernotifikasjonConfig {
     return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(getKafkaConfigProps()));
   }
 
+  @Bean("varsel")
+  public KafkaTemplate<String, String> kafkaTemplateOppretteVarsel() {
+    return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(getKafkaConfigProps()));
+  }
+
   @Bean
   BrukernotifikasjonConsumer brukernotifikasjonConsumer(
       Beskjedprodusent beskjedprodusent,
       Ferdigprodusent ferdigprodusent,
-      Oppgaveprodusent oppgaveprodusent,
+      Varselprodusent varselprodusent,
       FarskapsportalFellesEgenskaper farskapsportalFellesEgenskaper)
       throws MalformedURLException {
     return new BrukernotifikasjonConsumer(
-        beskjedprodusent, ferdigprodusent, oppgaveprodusent, farskapsportalFellesEgenskaper);
+        beskjedprodusent, ferdigprodusent, varselprodusent, farskapsportalFellesEgenskaper);
   }
 
   @Bean
@@ -133,11 +135,11 @@ public class BrukernotifikasjonConfig {
   }
 
   @Bean
-  Oppgaveprodusent oppgaveprodusent(
-      @Qualifier("oppgave") KafkaTemplate<NokkelInput, OppgaveInput> kafkaTemplate,
+  Varselprodusent varselprodusent(
+      @Qualifier("varsel") KafkaTemplate<String, String> kafkaTemplate,
       PersistenceService persistenceService)
       throws MalformedURLException {
-    return new Oppgaveprodusent(
+    return new Varselprodusent(
         kafkaTemplate,
         persistenceService,
         toUrl(farskapsportalFellesEgenskaper.getUrl()),

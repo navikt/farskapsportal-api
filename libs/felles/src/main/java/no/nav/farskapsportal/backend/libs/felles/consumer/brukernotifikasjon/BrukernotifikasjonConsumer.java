@@ -17,33 +17,33 @@ import no.nav.farskapsportal.backend.libs.felles.exception.InternFeilException;
 @Slf4j
 public class BrukernotifikasjonConsumer {
 
-  private static final String MELDING_OM_SIGNERT_FARSKAPSERKLAERING =
+  public static final String MELDING_OM_SIGNERT_FARSKAPSERKLAERING =
       "Du har mottatt en signert farskapserklæring som er tilgjengelig for nedlasting i en begrenset tidsperiode.";
-  private static final String MELDING_OM_VENTENDE_FARSKAPSERKLAERING =
+  public static final String MELDING_OM_VENTENDE_FARSKAPSERKLAERING =
       "Du har mottatt en farskapserklæring som venter på din signatur.";
-  private static final String MELDING_TIL_MOR_OM_AVBRUTT_SIGNERING =
+  public static final String MELDING_TIL_MOR_OM_AVBRUTT_SIGNERING =
       "Fars signering ble avbrutt, aktuell farskapserklæring måtte derfor slettes. Mor kan opprette ny hvis ønskelig. Trykk her for å opprette ny farskapserklæring.";
-  private static final String MELDING_TIL_FAR_OM_AVBRUTT_SIGNERING =
+  public static final String MELDING_TIL_FAR_OM_AVBRUTT_SIGNERING =
       "Fars signering ble avbrutt, aktuell farskapserklæring måtte derfor slettes. Mor kan opprette ny hvis ønskelig.";
-  private static final String MELDING_OM_MANGLENDE_SIGNERING =
+  public static final String MELDING_OM_MANGLENDE_SIGNERING =
       "Aksjon kreves: Farskapserklæring opprettet den %s for barn med %s er ikke ferdigstilt. Våre systemer mangler informasjon om at far har signert. Far må logge inn på Farskapsportal og forsøke å signere eller oppdatere status på ny. Ta kontakt med NAV ved problemer.";
-  private static final String MELDING_OM_IKKE_UTFOERT_SIGNERINGSOPPGAVE =
+  public static final String MELDING_OM_IKKE_UTFOERT_SIGNERINGSOPPGAVE =
       "Far har ikke signert farskapserklæringen innen fristen. Farskapserklæringen er derfor slettet. Mor kan opprette ny hvis ønskelig. Trykk her for å opprette ny farskapserklæring.";
 
   private final Beskjedprodusent beskjedprodusent;
   private final Ferdigprodusent ferdigprodusent;
-  private final Oppgaveprodusent oppgaveprodusent;
+  private final Varselprodusent varselprodusent;
   private final FarskapsportalFellesEgenskaper farskapsportalFellesEgenskaper;
 
   public BrukernotifikasjonConsumer(
       Beskjedprodusent beskjedprodusent,
       Ferdigprodusent ferdigprodusent,
-      Oppgaveprodusent oppgaveprodusent,
+      Varselprodusent varselprodusent,
       FarskapsportalFellesEgenskaper farskapsportalFellesEgenskaper)
       throws MalformedURLException {
     this.beskjedprodusent = beskjedprodusent;
     this.ferdigprodusent = ferdigprodusent;
-    this.oppgaveprodusent = oppgaveprodusent;
+    this.varselprodusent = varselprodusent;
     this.farskapsportalFellesEgenskaper = farskapsportalFellesEgenskaper;
   }
 
@@ -112,8 +112,7 @@ public class BrukernotifikasjonConsumer {
 
   public void oppretteOppgaveTilFarOmSignering(int idFarskapserklaering, Forelder far) {
     try {
-      oppgaveprodusent.oppretteOppgaveForSigneringAvFarskapserklaering(
-          idFarskapserklaering, far, MELDING_OM_VENTENDE_FARSKAPSERKLAERING, true);
+      varselprodusent.oppretteOppgaveForSigneringAvFarskapserklaering(idFarskapserklaering, far);
     } catch (InternFeilException internFeilException) {
       log.error(
           "En feil inntraff ved opprettelse av oppgave til far for farskapserklæring med id {}",

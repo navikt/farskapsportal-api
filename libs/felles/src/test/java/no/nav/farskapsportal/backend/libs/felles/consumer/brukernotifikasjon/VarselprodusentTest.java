@@ -30,6 +30,7 @@ import no.nav.farskapsportal.backend.libs.felles.persistence.dao.Farskapserklaer
 import no.nav.farskapsportal.backend.libs.felles.persistence.dao.OppgavebestillingDao;
 import no.nav.farskapsportal.backend.libs.felles.service.PersistenceService;
 import no.nav.farskapsportal.backend.libs.felles.test.utils.TestUtils;
+import no.nav.tms.varsel.action.Sensitivitet;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,17 +44,17 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(classes = FarskapsportalFellesTestConfig.class)
 @ActiveProfiles(FarskapsportalFellesConfig.PROFILE_TEST)
 @AutoConfigureWireMock(port = 0)
-public class OppgaveprodusentTest {
+public class VarselprodusentTest {
 
   @Value("${wiremock.server.port}")
   private String wiremockPort;
 
   private @Autowired FarskapsportalFellesEgenskaper farskapsportalFellesEgenskaper;
-  private @Autowired Oppgaveprodusent oppgaveprodusent;
+  private @Autowired Varselprodusent varselprodusent;
   private @Autowired PersistenceService persistenceService;
   private @Autowired FarskapserklaeringDao farskapserklaeringDao;
   private @Autowired OppgavebestillingDao oppgavebestillingDao;
-  private @MockBean KafkaTemplate<NokkelInput, OppgaveInput> oppgavekoe;
+  private @MockBean KafkaTemplate<String, String> varselkø;
   private @MockBean GcpStorageManager gcpStorageManager;
 
   @Test
@@ -63,8 +64,8 @@ public class OppgaveprodusentTest {
     oppgavebestillingDao.deleteAll();
     farskapserklaeringDao.deleteAll();
 
-    var noekkelfanger = ArgumentCaptor.forClass(NokkelInput.class);
-    var oppgavefanger = ArgumentCaptor.forClass(OppgaveInput.class);
+    var noekkelfanger = ArgumentCaptor.forClass(String.class);
+    var oppgavefanger = ArgumentCaptor.forClass(String.class);
 
     var far = Forelder.builder().foedselsnummer("11111122222").build();
     var oppgavetekst = "Vennligst signer farskapserklæringen";
@@ -83,11 +84,11 @@ public class OppgaveprodusentTest {
         persistenceService.lagreNyFarskapserklaering(farskapserklaeringSomVenterPaaFarsSignatur);
 
     // when
-    oppgaveprodusent.oppretteOppgaveForSigneringAvFarskapserklaering(
-        lagretFarskapserklaering.getId(), far, oppgavetekst, eksternVarsling);
+    varselprodusent.oppretteOppgaveForSigneringAvFarskapserklaering(
+        lagretFarskapserklaering.getId(), far);
 
     // then
-    verify(oppgavekoe, times(1))
+    verify(varselkø, times(1))
         .send(
             eq(farskapsportalFellesEgenskaper.getBrukernotifikasjon().getTopicOppgave()),
             noekkelfanger.capture(),
@@ -131,12 +132,7 @@ public class OppgaveprodusentTest {
                     farskapsportalFellesEgenskaper
                         .getBrukernotifikasjon()
                         .getGrupperingsidFarskap()),
-        () ->
-            assertThat(oppgave.getSikkerhetsnivaa())
-                .isEqualTo(
-                    farskapsportalFellesEgenskaper
-                        .getBrukernotifikasjon()
-                        .getSikkerhetsnivaaOppgave()),
+        () -> assertThat(oppgave.getSikkerhetsnivaa()).isEqualTo(Sensitivitet.High),
         () ->
             assertThat(oppgave.getTidspunkt())
                 .isBetween(
@@ -150,9 +146,6 @@ public class OppgaveprodusentTest {
     // given
     oppgavebestillingDao.deleteAll();
     farskapserklaeringDao.deleteAll();
-
-    var oppgavetekst = "Vennligst signer farskapserklæringen";
-    var eksternVarsling = false;
 
     var farskapserklaeringSomVenterPaaFarsSignatur =
         henteFarskapserklaering(
@@ -170,14 +163,11 @@ public class OppgaveprodusentTest {
         lagretFarskapserklaering.getId(), UUID.randomUUID().toString());
 
     // when
-    oppgaveprodusent.oppretteOppgaveForSigneringAvFarskapserklaering(
-        lagretFarskapserklaering.getId(),
-        lagretFarskapserklaering.getFar(),
-        oppgavetekst,
-        eksternVarsling);
+    varselprodusent.oppretteOppgaveForSigneringAvFarskapserklaering(
+        lagretFarskapserklaering.getId(), lagretFarskapserklaering.getFar());
 
     // then
-    verify(oppgavekoe, times(0)).send(anyString(), any(NokkelInput.class), any(OppgaveInput.class));
+    verify(varselkø, times(0)).send(anyString(), any(NokkelInput.class), any(OppgaveInput.class));
   }
 
   private Farskapserklaering henteFarskapserklaering(Forelder mor, Forelder far, Barn barn) {

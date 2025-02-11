@@ -115,6 +115,11 @@
                 <version>${token-support.version}</version>
             </dependency>
             <dependency>
+                <groupId>no.nav.tms.varsel</groupId>
+                <artifactId>java-builder</artifactId>
+                <version>1.1.0</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.navikt</groupId>
                 <artifactId>brukernotifikasjon-schemas</artifactId>
                 <version>${brukernotifikasjon-schemas.version}</version>

@@ -144,6 +144,11 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>no.nav.tms.varsel</groupId>
+            <artifactId>java-builder</artifactId>
+        </dependency>
+
         <!-- datasource -->
         <dependency>
             <groupId>com.zaxxer</groupId>

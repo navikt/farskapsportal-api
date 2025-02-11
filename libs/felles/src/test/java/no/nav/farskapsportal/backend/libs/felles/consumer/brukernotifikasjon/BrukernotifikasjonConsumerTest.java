@@ -39,6 +39,7 @@ import no.nav.farskapsportal.backend.libs.felles.persistence.dao.Farskapserklaer
 import no.nav.farskapsportal.backend.libs.felles.persistence.dao.OppgavebestillingDao;
 import no.nav.farskapsportal.backend.libs.felles.service.PersistenceService;
 import no.nav.farskapsportal.backend.libs.felles.test.utils.TestUtils;
+import no.nav.tms.varsel.action.Sensitivitet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -547,10 +548,7 @@ public class BrukernotifikasjonConsumerTest {
                         .getGrupperingsidFarskap()),
         () ->
             assertThat(oppgave.getSikkerhetsnivaa())
-                .isEqualTo(
-                    farskapsportalFellesEgenskaper
-                        .getBrukernotifikasjon()
-                        .getSikkerhetsnivaaOppgave()),
+                .isEqualTo(Sensitivitet.High),
         () ->
             assertThat(oppgave.getTidspunkt())
                 .isBetween(
